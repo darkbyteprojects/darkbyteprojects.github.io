@@ -3,15 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>DarkByteProjects — Index</title>
-<meta name="description" content="Central index of projects, tools, and repositories by DarkByteProjects.">
+<title>DarkByteProjects</title>
 <meta name="theme-color" content="#06060a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
   :root {
     --bg: #06060a;
     --bg-elev: #0c0c14;
@@ -26,10 +23,17 @@
     --cyan: #06b6d4;
     --grad: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
     --radius: 16px;
-    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    --mono: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+    --font: 'Inter', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+    --shadow: 0 20px 60px -20px rgba(0,0,0,0.8);
+    --title-size: clamp(30px, 5.5vw, 68px);
+    --title-lh: 0.85;
     --safe-top: env(safe-area-inset-top, 0px);
   }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
 
   body {
     font-family: var(--font);
@@ -38,239 +42,914 @@
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    display: flex;
-    flex-direction: column;
+    overflow-x: clip;
+    position: relative;
+    line-height: 1.5;
   }
 
-  @keyframes floatGradients {
-    0%   { transform: translate(0,0) scale(1); }
-    50%  { transform: translate(2%,2%) scale(1.05); }
-    100% { transform: translate(0,0) scale(1); }
-  }
-  
+  /* Ambient background gradient */
   body::before {
-    content:''; position:fixed; inset:0;
+    content: '';
+    position: fixed; inset: 0;
     background:
       radial-gradient(ellipse 700px 450px at 15% 0%,   rgba(139,92,246,.11), transparent 60%),
       radial-gradient(ellipse 800px 550px at 88% 15%,  rgba(6,182,212,.08),  transparent 60%),
       radial-gradient(ellipse 600px 500px at 50% 105%, rgba(139,92,246,.07), transparent 60%);
-    pointer-events:none; z-index:0;
-    animation: floatGradients 15s ease-in-out infinite alternate;
+    pointer-events: none; z-index: 0;
   }
 
-  .container { max-width: 1000px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; width: 100%; }
+  .container { max-width: 1000px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+  .page { position: relative; padding-top: calc(72px + var(--safe-top)); }
 
-  /* HEADER */
-  header {
-    padding: calc(80px + var(--safe-top)) 0 60px;
-    text-align: center;
-  }
+  /* ══════════════════════════════════════════════════════════
+     STICKY TITLE
+     ══════════════════════════════════════════════════════════ */
   .brand-title {
-    font-size: clamp(42px, 8vw, 64px);
+    position: sticky;
+    top: calc(var(--safe-top) - var(--title-size) * 0.08);
+    z-index: 90;
+    width: fit-content;
+    margin: 0 auto 30px;
+    padding: 0.13em 0.1em 0;
+    font-size: var(--title-size);
     font-weight: 800;
     letter-spacing: -0.045em;
-    line-height: 1.1;
+    line-height: var(--title-lh);
     background: linear-gradient(180deg, #ffffff 0%, #8a8aa0 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
+    -webkit-background-clip: text; background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-bottom: 12px;
+    pointer-events: none;
+    will-change: scale;
   }
-  .brand-subtitle {
-    font-size: 17px;
+
+  /* Gradient scrim under the sticky title */
+  body::after {
+    content: '';
+    position: fixed; top: 0; left: 0; right: 0;
+    height: calc(var(--safe-top) + var(--title-size) * 0.85 + 64px);
+    background: linear-gradient(to bottom, rgba(6,6,10,.92) 0%, rgba(6,6,10,.7) 50%, rgba(6,6,10,0) 100%);
+    pointer-events: none; z-index: 80;
+  }
+  @keyframes headerFade { from { opacity: 0; } to { opacity: 1; } }
+  @supports (animation-timeline: scroll()) {
+    body::after {
+      opacity: 0;
+      animation: headerFade linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 260px;
+    }
+  }
+
+  /* Hero subtitle */
+  .hero.container {
+    padding: 0 24px 56px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .subtitle {
+    font-size: 16.5px;
     color: var(--text-dim);
     max-width: 540px;
     margin: 0 auto;
     line-height: 1.65;
+    text-align: center;
   }
 
-  /* GRID */
-  main {
-    flex: 1;
-    padding-bottom: 100px;
-  }
+  /* ══════════════════════════════════════════════════════════
+     Grid & Card
+     ══════════════════════════════════════════════════════════ */
   .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 20px;
+    gap: 16px;
+    margin-bottom: 80px;
   }
 
-  /* CARDS */
   .card {
+    --mx: 50%;
+    --my: 50%;
+    --sx: 0px;
+    --sy: 0px;
+    transform-origin: 50% 50%;
     position: relative;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
+    padding: 22px;
     text-decoration: none;
     color: var(--text);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    will-change: transform;
+    transition: border-color .3s, background .3s, box-shadow .3s;
+    animation: fadeUp 0.6s ease-out backwards;
   }
-  .card::before {
-    content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
-    background: linear-gradient(135deg, rgba(139,92,246,0.5), rgba(6,182,212,0.5));
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor; mask-composite: exclude;
-    opacity: 0; transition: opacity 0.3s ease; pointer-events: none;
-  }
-  .card:hover {
-    background: var(--surface-2);
-    transform: translateY(-4px);
-    box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5), 0 0 20px -5px rgba(139,92,246,0.2);
-  }
-  .card:hover::before { opacity: 1; }
 
-  .card-icon {
-    width: 44px; height: 44px;
-    border-radius: 12px;
-    background: rgba(139,92,246,0.1);
-    color: var(--violet);
-    display: grid; place-items: center;
-    margin-bottom: 20px;
-    transition: all 0.3s ease;
+  /* Fill spotlight */
+  .card::after {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(260px circle at var(--mx) var(--my),
+      rgba(139,92,246,.20) 0%,
+      rgba(6,182,212,.08) 45%,
+      transparent 75%);
+    opacity: 0;
+    transition: opacity .3s;
+    pointer-events: none;
+    z-index: 0;
   }
-  .card:hover .card-icon {
-    background: var(--grad);
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(139,92,246,0.4);
+
+  /* Border spotlight */
+  .card::before {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background:
+      radial-gradient(190px circle at var(--mx) var(--my),
+        rgba(167,139,250,.95),
+        rgba(6,182,212,.4) 45%,
+        transparent 75%),
+      linear-gradient(135deg, rgba(139,92,246,.22), transparent 60%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    opacity: 0;
+    transition: opacity .3s;
+    pointer-events: none;
+    z-index: 2;
   }
-  .card-icon svg { width: 22px; height: 22px; }
+
+  .card:hover {
+    border-color: var(--border-2);
+    background: var(--surface-2);
+    box-shadow: var(--sx) calc(var(--sy) + 14px) 34px -12px rgba(139,92,246,.3);
+    z-index: 3;
+  }
+  .card:hover::before,
+  .card:hover::after { opacity: 1; }
+
+  .card > * { position: relative; z-index: 1; }
+
+  /* Card Content */
+  .card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    gap: 12px;
+  }
+
+  .badge {
+    --c: #8b5cf6;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    font-family: var(--mono);
+    white-space: nowrap;
+    color: var(--c);
+    background: color-mix(in srgb, var(--c) 12%, transparent);
+  }
+  .badge::before {
+    content: '';
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 8px currentColor;
+    flex-shrink: 0;
+    animation: pulseDot 2.4s ease-in-out infinite;
+  }
+  @keyframes pulseDot { 0%,100%{opacity:1} 50%{opacity:.45} }
+
+  .card-index {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--text-dimmer);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
 
   .card-title {
-    font-size: 18px;
+    font-size: 16.5px;
     font-weight: 600;
-    letter-spacing: -0.01em;
-    margin-bottom: 8px;
-  }
-  .card-desc {
-    font-size: 14px;
-    color: var(--text-dim);
-    line-height: 1.6;
-    margin-bottom: 20px;
-    flex: 1;
-  }
-  .card-link-text {
-    font-family: var(--mono);
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-dimmer);
-    display: flex; align-items: center; gap: 6px;
-    transition: color 0.2s ease;
-  }
-  .card:hover .card-link-text {
-    color: var(--cyan);
+    letter-spacing: -.012em;
+    line-height: 1.35;
+    margin-bottom: 4px;
+    color: var(--text);
   }
 
-  /* FOOTER */
-  .footer {
-    padding: 30px 24px;
-    text-align: center;
-    border-top: 1px solid var(--border);
+  .card-desc {
+    margin: 0 0 12px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--text-dim);
+    flex: 1;
+  }
+
+  .card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px 14px;
+    margin-bottom: 16px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dimmer);
+    min-width: 0;
+  }
+  .meta-domain {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow: hidden;
+    min-width: 0;
+  }
+  .meta-domain svg {
+    width: 12px; height: 12px;
+    flex-shrink: 0;
+  }
+  .meta-domain span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-dim);
+  }
+
+  .card-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     Global fix: Absolutely position the SVG bar
+     ══════════════════════════════════════════════════════════ */
+  .bar-svg {
+    position: absolute;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    overflow: visible;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Buttons ─────────────────────────────────────────────── */
+  .btn {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border: none;
+    background: transparent;
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+    text-decoration: none;
+  }
+  
+  /* Place bar behind text inside the isolated stacking context */
+  .btn > .bar-svg { z-index: -1; }
+  
+  .btn-in {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    transform-origin: 50% 50%;
+    will-change: scale;
     position: relative;
     z-index: 1;
   }
-  .footer a {
-    color: var(--text-dim);
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 600;
-    transition: color 0.2s;
+  .btn svg:not(.bar-svg) { width: 14px; height: 14px; flex-shrink: 0; }
+
+  .btn-visit {
+    flex: 1;
+    color: #fff;
   }
-  .footer a:hover { color: var(--text); }
-  
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+  .btn-visit .bar-svg {
+    filter: drop-shadow(0 4px 10px rgba(139,92,246,.4));
+    transition: filter .25s;
   }
-  .animate-1 { animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
-  .animate-2 { animation: fadeUp 0.6s 0.15s cubic-bezier(0.16, 1, 0.3, 1) both; }
-  .animate-3 { animation: fadeUp 0.6s 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .btn-visit:hover .bar-svg {
+    filter: drop-shadow(0 8px 16px rgba(139,92,246,.6));
+  }
+  .btn-visit .bar-svg .bar-base {
+    fill: url(#indG);
+    stroke: none;
+  }
+
+  /* Entrance animations */
+  @keyframes fadeUp { from { opacity: 0; translate: 0 20px; } to { opacity: 1; translate: 0 0; } }
+  @keyframes titleIn { from { opacity: 0; transform: translateY(18px) scale(.97); } to { opacity: 1; transform: none; } }
+
+  .brand-title { animation: titleIn .9s cubic-bezier(0.16,1,0.3,1) both; }
+  .subtitle   { animation: fadeUp .8s .3s cubic-bezier(0.16,1,0.3,1) both; }
+
+  /* Fluid char spans */
+  .brand-title .ch,
+  .subtitle .ch {
+    display: inline-block;
+    white-space: pre;
+    transform-origin: 50% 82%;
+    will-change: scale;
+  }
+  .brand-title .ch {
+    padding: .16em .04em .26em;
+    margin: -.16em -.04em -.26em;
+    background-image: linear-gradient(180deg, #ffffff 0%, #8a8aa0 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 
   @media (max-width: 640px) {
-    header { padding: calc(60px + var(--safe-top)) 0 40px; }
-    .grid { grid-template-columns: 1fr; }
+    .container { padding: 0 16px; }
+    .hero.container { padding: 0 16px 44px; }
+    .grid { grid-template-columns: 1fr; gap: 12px; margin-bottom: 48px; }
+    .card { padding: 18px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-delay: 0s !important;
+      transition-duration: 0.01ms !important;
+    }
+    html { scroll-behavior: auto; }
   }
 </style>
 </head>
 <body>
 
-  <header class="container">
-    <h1 class="brand-title animate-1">DarkByteProjects</h1>
-    <p class="brand-subtitle animate-2">Central index of tools, libraries, and applications.</p>
-  </header>
+  <!-- Hidden gradient used by the "Visit" button bar fill -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="indG" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#8b5cf6"/>
+        <stop offset="1" stop-color="#06b6d4"/>
+      </linearGradient>
+    </defs>
+  </svg>
 
-  <main class="container">
-    <div class="grid animate-3">
+  <div class="page">
 
-      <!-- Jailbreaks -->
-      <a href="https://darkbyteprojects.github.io/Jailbreaks/" class="card" target="_blank" rel="noopener">
-        <div class="card-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </div>
-        <h3 class="card-title">Jailbreaks</h3>
-        <p class="card-desc">Curated prompt library for ChatGPT, Claude, and DeepSeek. One tap to copy.</p>
-        <div class="card-link-text">darkbyteprojects.github.io/Jailbreaks/ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-      </a>
+    <h1 class="brand-title" id="brand-title">DarkByteProjects</h1>
 
-      <!-- LLM Injection Payloads -->
-      <a href="https://darkbyteprojects.github.io/llm_Injection_payloads/" class="card" target="_blank" rel="noopener">
-        <div class="card-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-        </div>
-        <h3 class="card-title">LLM Injection Payloads</h3>
-        <p class="card-desc">Collection of injection payloads for testing and pushing LLM security boundaries.</p>
-        <div class="card-link-text">darkbyteprojects.github.io/llm_Injection_payloads/ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-      </a>
+    <header class="hero container">
+      <p class="subtitle">Central index of tools, libraries, and applications.</p>
+    </header>
 
-      <!-- Prompt Checker -->
-      <a href="https://prompt-checker.dbprojects.workers.dev/" class="card" target="_blank" rel="noopener">
-        <div class="card-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg>
-        </div>
-        <h3 class="card-title">Prompt Checker</h3>
-        <p class="card-desc">Check user prompts against the curated DarkByte jailbreak prompt list safely.</p>
-        <div class="card-link-text">prompt-checker.dbprojects.workers.dev <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-      </a>
+    <main class="container">
+      <div class="grid" id="grid">
 
-      <!-- Vyan Live TV -->
-      <a href="https://vyan.dbprojects.workers.dev/" class="card" target="_blank" rel="noopener">
-        <div class="card-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
-        </div>
-        <h3 class="card-title">Vyan Live TV</h3>
-        <p class="card-desc">Live TV player Android application for seamless streaming and playback.</p>
-        <div class="card-link-text">vyan.dbprojects.workers.dev <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-      </a>
+        <!-- 1. Jailbreaks -->
+        <a href="https://darkbyteprojects.github.io/Jailbreaks/" class="card" style="animation-delay: 0.1s;" target="_blank" rel="noopener">
+          <div class="card-top">
+            <span class="badge" style="--c:#8b5cf6">Library</span>
+            <span class="card-index">01</span>
+          </div>
+          <h3 class="card-title">Jailbreaks</h3>
+          <p class="card-desc">Curated prompt library for ChatGPT, Claude, and DeepSeek. One tap to copy.</p>
+          <div class="card-meta">
+            <div class="meta-domain">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+              <span>darkbyteprojects.github.io/Jailbreaks</span>
+            </div>
+          </div>
+          <div class="card-actions">
+            <span class="btn btn-visit">
+              <span class="btn-in">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                Visit
+              </span>
+            </span>
+          </div>
+        </a>
 
-      <!-- Playlists Index -->
-      <a href="https://playlists.dbprojects.workers.dev/" class="card" target="_blank" rel="noopener">
-        <div class="card-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-        </div>
-        <h3 class="card-title">Playlists Index</h3>
-        <p class="card-desc">Centralised index of available Live TV streaming playlists.</p>
-        <div class="card-link-text">playlists.dbprojects.workers.dev <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-      </a>
+        <!-- 2. LLM Injection -->
+        <a href="https://darkbyteprojects.github.io/llm_Injection_payloads/" class="card" style="animation-delay: 0.2s;" target="_blank" rel="noopener">
+          <div class="card-top">
+            <span class="badge" style="--c:#f43f5e">Security</span>
+            <span class="card-index">02</span>
+          </div>
+          <h3 class="card-title">LLM Injection Payloads</h3>
+          <p class="card-desc">Collection of injection payloads for testing and pushing LLM security boundaries.</p>
+          <div class="card-meta">
+            <div class="meta-domain">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+              <span>darkbyteprojects.github.io/llm_Injection_payloads</span>
+            </div>
+          </div>
+          <div class="card-actions">
+            <span class="btn btn-visit">
+              <span class="btn-in">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                Visit
+              </span>
+            </span>
+          </div>
+        </a>
 
-      <!-- Playlists Inspector -->
-      <a href="https://terminal.dbprojects.workers.dev/" class="card" target="_blank" rel="noopener">
-        <div class="card-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-        </div>
-        <h3 class="card-title">Playlists Inspector</h3>
-        <p class="card-desc">Live TV playlists Inspector script setup website and terminal interface.</p>
-        <div class="card-link-text">terminal.dbprojects.workers.dev <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
-      </a>
+        <!-- 3. Prompt Checker -->
+        <a href="https://prompt-checker.dbprojects.workers.dev/" class="card" style="animation-delay: 0.3s;" target="_blank" rel="noopener">
+          <div class="card-top">
+            <span class="badge" style="--c:#10b981">Tool</span>
+            <span class="card-index">03</span>
+          </div>
+          <h3 class="card-title">Prompt Checker</h3>
+          <p class="card-desc">Check user prompts against the curated DarkByte jailbreak prompt list safely.</p>
+          <div class="card-meta">
+            <div class="meta-domain">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+              <span>prompt-checker.dbprojects.workers.dev</span>
+            </div>
+          </div>
+          <div class="card-actions">
+            <span class="btn btn-visit">
+              <span class="btn-in">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                Visit
+              </span>
+            </span>
+          </div>
+        </a>
 
-    </div>
-  </main>
+        <!-- 4. Vyan Live TV -->
+        <a href="https://vyan.dbprojects.workers.dev/" class="card" style="animation-delay: 0.4s;" target="_blank" rel="noopener">
+          <div class="card-top">
+            <span class="badge" style="--c:#06b6d4">App</span>
+            <span class="card-index">04</span>
+          </div>
+          <h3 class="card-title">Vyan Live TV</h3>
+          <p class="card-desc">Live TV player Android application for seamless streaming and playback.</p>
+          <div class="card-meta">
+            <div class="meta-domain">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+              <span>vyan.dbprojects.workers.dev</span>
+            </div>
+          </div>
+          <div class="card-actions">
+            <span class="btn btn-visit">
+              <span class="btn-in">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                Visit
+              </span>
+            </span>
+          </div>
+        </a>
 
-  <footer class="footer">
-    <a href="https://github.com/darkbyteprojects" target="_blank" rel="noopener">github.com/darkbyteprojects</a>
-  </footer>
+        <!-- 5. Playlists Index -->
+        <a href="https://playlists.dbprojects.workers.dev/" class="card" style="animation-delay: 0.5s;" target="_blank" rel="noopener">
+          <div class="card-top">
+            <span class="badge" style="--c:#f59e0b">Index</span>
+            <span class="card-index">05</span>
+          </div>
+          <h3 class="card-title">Playlists Index</h3>
+          <p class="card-desc">Centralised index of available Live TV streaming playlists.</p>
+          <div class="card-meta">
+            <div class="meta-domain">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+              <span>playlists.dbprojects.workers.dev</span>
+            </div>
+          </div>
+          <div class="card-actions">
+            <span class="btn btn-visit">
+              <span class="btn-in">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                Visit
+              </span>
+            </span>
+          </div>
+        </a>
 
+        <!-- 6. Playlists Inspector -->
+        <a href="https://terminal.dbprojects.workers.dev/" class="card" style="animation-delay: 0.6s;" target="_blank" rel="noopener">
+          <div class="card-top">
+            <span class="badge" style="--c:#a855f7">Terminal</span>
+            <span class="card-index">06</span>
+          </div>
+          <h3 class="card-title">Playlists Inspector</h3>
+          <p class="card-desc">Live TV playlists Inspector script setup website and terminal interface.</p>
+          <div class="card-meta">
+            <div class="meta-domain">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+              <span>terminal.dbprojects.workers.dev</span>
+            </div>
+          </div>
+          <div class="card-actions">
+            <span class="btn btn-visit">
+              <span class="btn-in">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                Visit
+              </span>
+            </span>
+          </div>
+        </a>
+
+      </div>
+    </main>
+
+  </div><!-- /.page -->
+
+<script>
+/* =========================================================
+   Helpers
+   ========================================================= */
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+function charSpans(str) {
+  return [...str].map(c =>
+    `<span class="ch">${c === ' ' ? '\u00a0' : escapeHtml(c)}</span>`
+  ).join('');
+}
+
+/* =========================================================
+   Liquid shape + text bulge
+   ========================================================= */
+function liquidShape(L, R, r, top, bot, lift) {
+  const N = 14, xs = [], cs = [];
+  for (let i = 0; i <= N; i++) {
+    const th = Math.PI / 2 * i / N;
+    xs.push(L + r * (1 - Math.cos(th)));
+    cs.push(r * (1 - Math.sin(th)));
+  }
+  for (let x = L + r + 3; x < R - r - 1.5; x += 3) { xs.push(x); cs.push(0); }
+  for (let j = 0; j <= N; j++) {
+    const th = Math.PI / 2 * (1 - j / N);
+    xs.push(R - r * (1 - Math.cos(th)));
+    cs.push(r * (1 - Math.sin(th)));
+  }
+  let d = '';
+  for (let i = 0; i < xs.length; i++)
+    d += (i ? 'L' : 'M') + xs[i].toFixed(1) + ' ' + (top + cs[i] - lift(xs[i])).toFixed(2);
+  for (let i = xs.length - 1; i >= 0; i--)
+    d += 'L' + xs[i].toFixed(1) + ' ' + (bot - cs[i] + lift(xs[i])).toFixed(2);
+  return d + 'Z';
+}
+
+const TEXT_GAIN = 1.5, TEXT_X = 0.08;
+function liquidText(wrapEl, bar, nodes) {
+  nodes = nodes.filter(Boolean);
+  if (!nodes.length) return;
+  const wr = wrapEl.getBoundingClientRect();
+  const H  = wrapEl.offsetHeight || 1;
+  const cx = nodes.map(n => {
+    const r = n.getBoundingClientRect();
+    return r.left + r.width / 2 - wr.left;
+  });
+  nodes.forEach((n, i) => {
+    const lv = bar.levelAt(cx[i]), lf = bar.lift(cx[i]);
+    const sy = 1 + TEXT_GAIN * 2 * lf / H;
+    const sx = 1 + TEXT_X * lv;
+    n.style.scale = (sy < 1.001 && sx < 1.001) ? '' : `${sx.toFixed(3)} ${sy.toFixed(3)}`;
+  });
+}
+
+/* =========================================================
+   Global pointer cleanup
+   ========================================================= */
+const liveBars = new Set();
+document.addEventListener('pointermove', e => {
+  liveBars.forEach(b => {
+    if (!b.wrap.isConnected) { liveBars.delete(b); return; }
+    if (b.st.px !== null && !b.wrap.contains(e.target)) { b.st.px = null; b.request(); }
+  });
+}, { passive: true });
+document.addEventListener('pointerleave', () => {
+  liveBars.forEach(b => { b.st.px = null; b.request(); });
+});
+
+/* =========================================================
+   Bulge bar factory
+   ========================================================= */
+let barUid = 0;
+function createBar(wrap, { radius = 14, max = 6, sigma = 80, glow = 130 } = {}) {
+  const NS = 'http://www.w3.org/2000/svg', id = 'bs' + (++barUid);
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('class', 'bar-svg');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.setAttribute('preserveAspectRatio', 'none');
+  svg.innerHTML = `
+    <defs>
+      <radialGradient id="${id}f" gradientUnits="userSpaceOnUse" r="${glow}">
+        <stop offset="0" stop-color="#8b5cf6" stop-opacity=".22"/>
+        <stop offset=".5" stop-color="#06b6d4" stop-opacity=".07"/>
+        <stop offset="1" stop-color="#06b6d4" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="${id}e" gradientUnits="userSpaceOnUse" r="${glow * .85}">
+        <stop offset="0" stop-color="#a78bfa" stop-opacity=".95"/>
+        <stop offset=".55" stop-color="#06b6d4" stop-opacity=".35"/>
+        <stop offset="1" stop-color="#06b6d4" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <path class="bar-base"/>
+    <path class="bar-spot" fill="url(#${id}f)" stroke="none"/>
+    <path class="bar-edge" fill="none" stroke="url(#${id}e)" stroke-width="1.5"/>`;
+  wrap.prepend(svg);
+
+  const base = svg.querySelector('.bar-base'),
+        spot = svg.querySelector('.bar-spot'),
+        edge = svg.querySelector('.bar-edge');
+  const gF = svg.querySelectorAll('radialGradient')[0],
+        gE = svg.querySelectorAll('radialGradient')[1];
+
+  const st = { px: null, py: 0, cx: 0, cy: 0, amp: 0, pAmp: 0, pX: 0, raf: 0, hook: null, W: 0, r: radius };
+  const smooth = t => t * t * (3 - 2 * t);
+  const clamp01 = v => Math.min(1, Math.max(0, v));
+  const levelAt = x => st.amp * Math.exp(-((x - st.cx) ** 2) / (2 * sigma * sigma));
+  function bumpAt(x) {
+    let b = max * levelAt(x);
+    if (st.pAmp > 0.01) b += st.pAmp * Math.exp(-((x - st.pX) ** 2) / (2 * (sigma * .7) ** 2));
+    return b;
+  }
+  const lift = x => bumpAt(x) * smooth(clamp01(Math.min(x, st.W - x) / (st.r * 2)));
+
+  function draw() {
+    const W = wrap.offsetWidth, H = wrap.offsetHeight;
+    if (!W || !H) return;
+    st.W = W;
+    st.r = Math.min(radius, H / 2 - .5);
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    const d = liquidShape(.5, W - .5, st.r, .5, H - .5, lift);
+    base.setAttribute('d', d);
+    spot.setAttribute('d', d);
+    edge.setAttribute('d', d);
+    [gF, gE].forEach(g => {
+      g.setAttribute('cx', st.cx);
+      g.setAttribute('cy', st.cy);
+      g.setAttribute('fx', st.cx);
+      g.setAttribute('fy', st.cy);
+    });
+    spot.style.opacity = st.amp;
+    edge.style.opacity = st.amp;
+  }
+
+  function tick() {
+    st.raf = 0;
+    if (st.px !== null) {
+      if (st.amp < .02) { st.cx = st.px; st.cy = st.py; }
+      else { st.cx += (st.px - st.cx) * .35; st.cy += (st.py - st.cy) * .35; }
+    }
+    st.amp += ((st.px === null ? 0 : 1) - st.amp) * .16;
+    if (st.amp < .002) st.amp = 0;
+    st.pAmp *= .92;
+    if (st.pAmp < .02) st.pAmp = 0;
+
+    let busy = false;
+    if (st.hook) busy = !!st.hook();
+    draw();
+    if (st.px !== null || st.amp > 0 || st.pAmp > 0 || busy) request();
+  }
+  function request() { if (!st.raf) st.raf = requestAnimationFrame(tick); }
+
+  wrap.addEventListener('pointermove', e => {
+    if (e.pointerType === 'touch') return;
+    const r = wrap.getBoundingClientRect();
+    st.px = e.clientX - r.left;
+    st.py = e.clientY - r.top;
+    request();
+  });
+  wrap.addEventListener('pointerleave', () => { st.px = null; request(); });
+
+  if ('ResizeObserver' in window) new ResizeObserver(() => { draw(); request(); }).observe(wrap);
+  else window.addEventListener('resize', () => { draw(); request(); });
+
+  draw();
+  liveBars.add({ wrap, st, request });
+
+  return {
+    st, request, draw, levelAt, bumpAt, lift,
+    pulse(a) { st.pAmp = a; request(); },
+    setHook(fn) { st.hook = fn; }
+  };
+}
+
+/* =========================================================
+   3D tilt — spring-smoothed
+   ========================================================= */
+const TILT_MAX = 12, TILT_SCALE = 1.05, TILT_PERSP = 700;
+const tilts = new Map();
+let tiltRaf = 0, tiltCard = null;
+const canTilt = !matchMedia('(prefers-reduced-motion:reduce)').matches;
+const clampN = v => Math.max(-1, Math.min(1, v));
+
+function tiltTo(c, nx, ny) {
+  let t = tilts.get(c);
+  if (!t) { t = { rx: 0, ry: 0, s: 1, sx: 0, sy: 0 }; tilts.set(c, t); }
+  t.trx = -ny * TILT_MAX;
+  t.tyr =  nx * TILT_MAX;
+  t.ts  = TILT_SCALE;
+  t.tsx = -nx * 16;
+  t.tsy = -ny * 16;
+  if (!tiltRaf) tiltRaf = requestAnimationFrame(tiltLoop);
+}
+function tiltRelease(c) {
+  const t = c && tilts.get(c);
+  if (!t) return;
+  t.trx = t.tyr = t.tsx = t.tsy = 0;
+  t.ts = 1;
+  if (!tiltRaf) tiltRaf = requestAnimationFrame(tiltLoop);
+}
+function tiltLoop() {
+  tiltRaf = 0;
+  let busy = false;
+  tilts.forEach((t, c) => {
+    const k = .16;
+    t.rx += (t.trx - t.rx) * k;
+    t.ry += (t.tyr - t.ry) * k;
+    t.s  += (t.ts  - t.s ) * k;
+    t.sx += (t.tsx - t.sx) * k;
+    t.sy += (t.tsy - t.sy) * k;
+
+    const rest = t.ts === 1 && Math.abs(t.rx) < .02 && Math.abs(t.ry) < .02 && Math.abs(t.s - 1) < .0005;
+    if (rest) {
+      c.style.transform = '';
+      c.style.removeProperty('--sx');
+      c.style.removeProperty('--sy');
+      tilts.delete(c);
+      return;
+    }
+    c.style.transform =
+      `perspective(${TILT_PERSP}px) rotateX(${t.rx.toFixed(2)}deg) rotateY(${t.ry.toFixed(2)}deg) ` +
+      `scale3d(${t.s.toFixed(4)},${t.s.toFixed(4)},${t.s.toFixed(4)})`;
+    c.style.setProperty('--sx', t.sx.toFixed(1) + 'px');
+    c.style.setProperty('--sy', t.sy.toFixed(1) + 'px');
+    busy = true;
+  });
+  if (busy) tiltRaf = requestAnimationFrame(tiltLoop);
+}
+
+/* =========================================================
+   Fluid header text
+   ========================================================= */
+const headFxGroups = [];
+
+function layoutLeft(el) {
+  let x = 0, e = el;
+  while (e) { x += e.offsetLeft; e = e.offsetParent; }
+  return x;
+}
+function applyGradToGroup(g) {
+  if (!g.grad || !g.chars) return;
+  g.chars.forEach(c => {
+    c.n.style.backgroundImage = g.grad;
+    c.n.style.webkitBackgroundClip = 'text';
+    c.n.style.backgroundClip = 'text';
+    c.n.style.webkitTextFillColor = 'transparent';
+    c.n.style.backgroundRepeat = 'no-repeat';
+  });
+  syncGradToGroup(g);
+}
+function syncGradToGroup(g) {
+  if (!g.grad || !g.chars || !g.chars.length) return;
+  const W = g.el.offsetWidth;
+  if (!W) return;
+  const base = layoutLeft(g.el);
+  g.chars.forEach(c => {
+    const off = layoutLeft(c.n) - base;
+    c.n.style.setProperty('--W', W + 'px');
+    c.n.style.setProperty('--o', off + 'px');
+  });
+}
+function syncGrad() { headFxGroups.forEach(g => { if (g.grad) syncGradToGroup(g); }); }
+
+function initHeadFx() {
+  const groups = [
+    {
+      el: document.getElementById('brand-title'),
+      sig: .8, gy: .20, gx: .05, reach: .75,
+      grad: 'linear-gradient(180deg,#ffffff 0%,#8a8aa0 100%)'
+    },
+    {
+      el: document.querySelector('.subtitle'),
+      sig: 1.5, gy: .15, gx: .04, reach: 1.0
+    }
+  ];
+  headFxGroups.push(...groups);
+
+  groups.forEach(g => {
+    const txt = g.el.textContent.trim();
+    g.el.setAttribute('aria-label', txt);
+    g.el.innerHTML = `<span aria-hidden="true">${charSpans(txt)}</span>`;
+    g.chars = [...g.el.querySelectorAll('.ch')].map(n => ({ n, sx: 1, sy: 1 }));
+    if (g.grad) applyGradToGroup(g);
+  });
+
+  syncGrad();
+  window.addEventListener('resize', syncGrad);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncGrad);
+
+  let mx = -9999, my = -9999, raf = 0;
+  function frame() {
+    raf = 0;
+    let busy = false;
+    groups.forEach(g => {
+      const r = g.el.getBoundingClientRect();
+      const fs = parseFloat(getComputedStyle(g.el).fontSize);
+      const dy = my - (r.top + r.height / 2);
+      const vf = Math.exp(-(dy * dy) / (2 * (g.reach * fs) ** 2));
+      g.chars.forEach(c => {
+        const cr = c.n.getBoundingClientRect();
+        const dx = mx - (cr.left + cr.width / 2);
+        const w = Math.exp(-(dx * dx) / (2 * (g.sig * fs) ** 2)) * vf;
+        const ty = 1 + g.gy * w;
+        const tx = 1 + g.gx * w;
+        c.sy += (ty - c.sy) * .2;
+        c.sx += (tx - c.sx) * .2;
+        if (Math.abs(ty - c.sy) > .001 || Math.abs(tx - c.sx) > .001) busy = true;
+        c.n.style.scale = (c.sy < 1.002 && c.sx < 1.002) ? '' : `${c.sx.toFixed(3)} ${c.sy.toFixed(3)}`;
+      });
+    });
+    if (busy) raf = requestAnimationFrame(frame);
+  }
+  const go = () => { if (!raf) raf = requestAnimationFrame(frame); };
+
+  window.addEventListener('pointermove', e => {
+    if (e.pointerType === 'touch') return;
+    mx = e.clientX; my = e.clientY; go();
+  }, { passive: true });
+  document.addEventListener('pointerleave', () => { mx = my = -9999; go(); });
+  window.addEventListener('scroll', () => { if (mx > -1000) go(); }, { passive: true });
+}
+
+/* =========================================================
+   Wire everything up
+   ========================================================= */
+const grid = document.getElementById('grid');
+
+function initCardButtons(root) {
+  root.querySelectorAll('.card-actions .btn').forEach(btn => {
+    if (btn.dataset.fluid) return;
+    btn.dataset.fluid = '1';
+    const inner = btn.querySelector('.btn-in');
+    const bar = createBar(btn, { radius: 9, max: 4, sigma: 34, glow: 70 });
+    btn._bar = bar;
+    bar.setHook(() => { liquidText(btn, bar, [inner]); return false; });
+    requestAnimationFrame(() => { bar.draw(); bar.request(); });
+  });
+}
+
+function initCards() {
+  // Liquid bar on each Visit button
+  initCardButtons(document);
+
+  // 3D tilt + spotlight tracking
+  grid.addEventListener('pointermove', e => {
+    if (e.pointerType === 'touch') return;
+    const c = e.target.closest('.card');
+    if (c !== tiltCard) { tiltRelease(tiltCard); tiltCard = c; }
+    if (!c) return;
+
+    const op = c.offsetParent.getBoundingClientRect();
+    const w = c.offsetWidth, h = c.offsetHeight;
+    const x = e.clientX - (op.left + c.offsetLeft);
+    const y = e.clientY - (op.top  + c.offsetTop);
+
+    c.style.setProperty('--mx', x + 'px');
+    c.style.setProperty('--my', y + 'px');
+
+    if (canTilt) tiltTo(c, clampN(x / w * 2 - 1), clampN(y / h * 2 - 1));
+  });
+
+  grid.addEventListener('pointerleave', () => {
+    tiltRelease(tiltCard);
+    tiltCard = null;
+  });
+}
+
+/* =========================================================
+   Boot
+   ========================================================= */
+function boot() {
+  initHeadFx();
+  initCards();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', boot);
+} else {
+  boot();
+}
+</script>
 </body>
 </html>
